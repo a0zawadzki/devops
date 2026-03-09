@@ -1,8 +1,30 @@
+# Python (to już masz, jest super)
 __pycache__/
 *.pyc
-.git
+*.pyo
+*.pyd
+
+# Środowisko i sekrety (kluczowe dla bezpieczeństwa!)
 .env
+.venv
+env/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Git i GitHub (nie chcemy workflowów w obrazie)
+.git
+.github/
+.gitignore
+
+# Pliki deweloperskie i Docker (już masz)
 tests/
 test_main.py
 Dockerfile
 docker-compose.yml
+README.md
+
+# Systemowe (często pomijane, a robią bałagan)
+.DS_Store
+Thumbs.db
