@@ -1,4 +1,4 @@
-name: CI Non-Root Branch
+name: CI Non-Root PRO (Versioning & Push)
 
 on:
   push:
@@ -18,20 +18,42 @@ jobs:
       - name: Run Pytest
         run: pytest
 
-  docker-build-nonroot:
+  release-and-build:
     needs: unit-tests
     runs-on: ubuntu-latest
+    # Kluczowe uprawnienia dla PRO: zapis tagów i pakietów
+    permissions:
+      contents: write
+      packages: write
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Build Non-Root Image
-        run: docker build -t hello-nonroot:test .
-      - name: Verify UID 1000
-        run: |
-          # Sprawdzamy czy proces wewnątrz kontenera ma UID 1000
-          CURRENT_UID=$(docker run --rm hello-nonroot:test id -u)
-          if [ "$CURRENT_UID" -eq "1000" ]; then
-            echo "Success: Image runs as non-root user (1000)"
-          else
-            echo "Error: Image runs as $CURRENT_UID, expected 1000!"
-            exit 1
-          fi
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Pobiera historię dla poprawnego wyliczenia wersji
+
+      # 1. Automatyczne wyliczanie wersji i tworzenie tagu w Git
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+
+      # 2. Logowanie do GitHub Container Registry
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. Build i Push z nowym numerem wersji
+      - name: Build and push Non-Root Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/hello-nonroot:${{ steps.tag_version.outputs.new_tag }}
+            ghcr.io/${{ github.repository_owner }}/hello-nonroot:latest
