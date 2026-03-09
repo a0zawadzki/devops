@@ -1,25 +1,32 @@
-FROM python:3.11-slim
+# ETAP 1: Builder
+FROM python:3.11-slim AS builder
 
-# 1. Przygotowanie środowiska (Jako ROOT)
+# Definiujemy zmienną, żeby nie wpisywać ścieżki ręcznie 5 razy
+ENV PYROOT=/install
+ENV PYTHONUSERBASE=$PYROOT
+
 WORKDIR /app
-RUN useradd -m appuser
 
-# 2. Instalacja zależności (Cache'owanie warstw)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-    find /usr/local -depth \
-        \( \
-            \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
-            -o \
-            \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
-        \) -exec rm -rf '{}' +
 
-# 3. Kopiowanie kodu Z ODRAZU z poprawnym właścicielem
-# To oszczędza miejsce w obrazie i jest bezpieczniejsze
-COPY --chown=appuser:appuser . .
+# Instalujemy biblioteki do naszego zdefiniowanego folderu
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# 4. PRZEŁĄCZENIE NA UŻYTKOWNIKA
-USER appuser
+# ETAP 2: Final
+FROM gcr.io/distroless/python3-debian12
 
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+WORKDIR /app
+
+# Ustawiamy tę samą zmienną, żeby Python wiedział gdzie szukać
+ENV PYROOT=/install
+ENV PYTHONPATH=$PYROOT/lib/python3.11/site-packages
+ENV PATH=$PYROOT/bin:$PATH
+
+# Teraz COPY wygląda znacznie czyściej - kopiujemy CAŁY nasz folder /install
+COPY --from=builder /install /install
+
+COPY main.py .
+COPY test_main.py .
+
+USER 65532
+ENTRYPOINT ["python3", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
