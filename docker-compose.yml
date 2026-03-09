@@ -3,7 +3,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/hello-app:latest
+    image: ghcr.io/a0zawadzki/hello-app:latest
     container_name: fast-api-prod
     ports:
       - "8000:8000"
