@@ -43,7 +43,7 @@ Sprawdź poprawność instalacji komendą: `docker compose version`
 ### Opcja A: Metoda "Pancerna" (Zalecana)
 Pobierz tylko konfigurację i uruchom w bezpiecznym środowisku (ReadOnly FS, Cap Drop, Resource Limits):
 ```bash
-curl -L -O [https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml](https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml) && docker-compose up -d
+curl -L -O https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml && docker-compose up -d
 ```
 ### Opcja B: Metoda Szybka (Tylko obraz)
 ```bash
