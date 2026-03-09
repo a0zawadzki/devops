@@ -1,25 +1,32 @@
+# ETAP 1: Builder
+FROM python:3.11-slim AS builder
+
+ENV PYROOT=/install
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=$PYROOT -r requirements.txt
+
+# Kopiujemy kod do folderu, który i tak będziemy przenosić
+COPY main.py $PYROOT/main.py
+COPY test_main.py .
+
+# Testy (nadal używamy bibliotek z /install)
+RUN PYTHONPATH=$PYROOT/lib/python3.11/site-packages python3 -m pytest test_main.py
+
+# ETAP 2: Final
 FROM python:3.11-slim
 
-# 1. Przygotowanie środowiska (Jako ROOT)
+RUN useradd -m -u 1000 appuser
 WORKDIR /app
-RUN useradd -m appuser
 
-# 2. Instalacja zależności (Cache'owanie warstw)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-    find /usr/local -depth \
-        \( \
-            \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
-            -o \
-            \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
-        \) -exec rm -rf '{}' +
+# Ustawiamy ścieżki tak, by Python szukał bibliotek I kodu w /app
+ENV PYTHONPATH=/app/lib/python3.11/site-packages
+ENV PATH=/app/bin:$PATH
 
-# 3. Kopiowanie kodu Z ODRAZU z poprawnym właścicielem
-# To oszczędza miejsce w obrazie i jest bezpieczniejsze
-COPY --chown=appuser:appuser . .
+# --- JEDEN COPY, JEDNA WARSTWA ---
+# Kopiujemy zawartość /install bezpośrednio do /app z poprawnym właścicielem
+COPY --from=builder --chown=appuser:appuser /install .
 
-# 4. PRZEŁĄCZENIE NA UŻYTKOWNIKA
 USER appuser
-
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["python3", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
