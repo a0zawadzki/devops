@@ -12,7 +12,7 @@ COPY main.py $PYROOT/main.py
 COPY test_main.py .
 
 # Testy (nadal używamy bibliotek z /install)
-RUN PYTHONPATH=$PYROOT/lib/python3.11/site-packages python3 -m pytest test_main.py
+RUN PYTHONPATH=$PYROOT:$PYROOT/lib/python3.11/site-packages python3 -m pytest test_main.py
 
 # ETAP 2: Final
 FROM python:3.11-slim
