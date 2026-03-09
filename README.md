@@ -1,5 +1,4 @@
 # 🤖 Pancerne FastAPI - AI-Driven DevOps Showcase
-
 ![CI/CD Pipeline](https://github.com/a0zawadzki/devops/actions/workflows/dev-prod.yml/badge.svg?branch=develop)
 ![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)
 ![AI-Powered](https://img.shields.io/badge/vibe-coding-blueviolet?logo=google-gemini&logoColor=white)
@@ -31,14 +30,22 @@ Każda zmiana przechodzi przez wielopoziomową weryfikację:
 
 Monitoruj akcje na żywo: [GitHub Actions Dashboard](https://github.com/a0zawadzki/devops/actions)
 
+## 📋 Wymagania (Prerequisites)
+
+Do uruchomienia projektu potrzebujesz jedynie:
+* **Docker** (wersja 20.10+)
+* **Docker Compose** (V2 - obecnie zintegrowany z Docker Desktop/Engine)
+
+Sprawdź poprawność instalacji komendą: `docker compose version`
+
 ## 🚀 Szybki Start
 
-### Pobranie gotowego obrazu (Latest Stable)
+### Opcja A: Metoda "Pancerna" (Zalecana)
+Pobierz tylko konfigurację i uruchom w bezpiecznym środowisku (ReadOnly FS, Cap Drop, Resource Limits):
 ```bash
-docker pull ghcr.io/a0zawadzki/hello-app:latest
+curl -L -O [https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml](https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml) && docker-compose up -d
 ```
-### ⚡ Uruchomienie lokalne (Dev/Debug)
-Wykorzystaj Docker Compose z pełnym hardeningiem (ReadOnly FS, Cap Drop, Resource Limits):
+### Opcja B: Metoda Szybka (Tylko obraz)
 ```bash
-docker-compose up --build
+docker run -d -p 8000:8000 ghcr.io/a0zawadzki/hello-app:latest
 ```
