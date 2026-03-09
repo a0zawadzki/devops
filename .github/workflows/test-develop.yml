@@ -38,7 +38,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: minor # Na develop podbijamy "minor" (środkową cyfrę)
+          default_bump: patch           # Zmieniamy na patch (0.1.x), chyba że wolisz minor (0.x.0)
+          release_branches: develop      # To usunie dopisek "-develop"
 
       - name: Build Image for Smoke Test
         run: docker build -t app-dev-test:${{ github.sha }} .
