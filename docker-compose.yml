@@ -6,8 +6,8 @@ services:
       dockerfile: Dockerfile
     
     # 2. Nazewnictwo i sieć
-    image: hello-nonroot:1.0.0
-    container_name: fast-api-app
+    image: hello-distroless:1.0.0
+    container_name: fast-api-distroless
     ports:
       - "8000:8000"
 
