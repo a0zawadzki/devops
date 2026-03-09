@@ -2,7 +2,7 @@ name: CI/CD Develop (Production Grade)
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "main" ]
 
 jobs:
   # KROK 1: Testy jednostkowe
@@ -38,8 +38,9 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch           # Zmieniamy na patch (0.1.x), chyba że wolisz minor (0.x.0)
-          release_branches: develop      # To usunie dopisek "-develop"
+          default_bump: patch
+          # Rejestrujemy oba jako "stabilne" dla czystych tagów
+          release_branches: main,develop
 
       - name: Build Image for Smoke Test
         run: docker build -t app-dev-test:${{ github.sha }} .
