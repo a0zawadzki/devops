@@ -1,4 +1,8 @@
+__pycache__/
+*.pyc
 .git
-venv
-__pycache__
-.pytest_cache
+.env
+tests/
+test_main.py
+Dockerfile
+docker-compose.yml
