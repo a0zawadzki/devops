@@ -1,0 +1,37 @@
+name: CI Non-Root Branch
+
+on:
+  push:
+    branches: [ "feature/docker-nonroot" ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest httpx
+      - name: Run Pytest
+        run: pytest
+
+  docker-build-nonroot:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Non-Root Image
+        run: docker build -t hello-nonroot:test .
+      - name: Verify UID 1000
+        run: |
+          # Sprawdzamy czy proces wewnątrz kontenera ma UID 1000
+          CURRENT_UID=$(docker run --rm hello-nonroot:test id -u)
+          if [ "$CURRENT_UID" -eq "1000" ]; then
+            echo "Success: Image runs as non-root user (1000)"
+          else
+            echo "Error: Image runs as $CURRENT_UID, expected 1000!"
+            exit 1
+          fi
