@@ -1,0 +1,16 @@
+services:
+  api:
+    # 1. Tu wskazujemy JAK budować
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    # 2. Tu wskazujemy JAK nazwać gotowy obraz
+    image: hello-nonroot:1.0.0
+    container_name: fast-api-app
+    ports:
+      - "8000:8000"
+    # 3. Limity zasobów (DevOps Pro Tip)
+    deploy:
+      resources:
+        limits:
+          memory: 256M
