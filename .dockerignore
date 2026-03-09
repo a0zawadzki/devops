@@ -19,8 +19,6 @@ htmlcov/
 .gitignore
 
 # Pliki deweloperskie i Docker (już masz)
-tests/
-test_main.py
 Dockerfile
 docker-compose.yml
 README.md
