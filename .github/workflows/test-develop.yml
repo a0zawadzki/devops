@@ -1,13 +1,12 @@
-name: CI Develop Branch
+name: CI/CD Develop (Production Grade)
 
 on:
   push:
     branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
 
 jobs:
-  python-logic-tests:
+  # KROK 1: Testy jednostkowe
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,24 +19,57 @@ jobs:
       - name: Run Pytest
         run: pytest
 
-  # Na develop budujemy obraz, żeby mieć pewność, że wszystko "się klei"
-  build-verification:
-    needs: python-logic-tests
+  # KROK 2: Build, Smoke Test i Push
+  build-and-release:
+    needs: tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
     steps:
       - uses: actions/checkout@v4
-      - name: Build Production Image
-        run: docker build -t app-prod:latest .
-      - name: Smoke Test
+        with:
+          fetch-depth: 0
+
+      # Wyliczanie wersji (np. v1.1.0)
+      - name: Bump version
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: minor # Na develop podbijamy "minor" (środkową cyfrę)
+
+      - name: Build Image for Smoke Test
+        run: docker build -t app-dev-test:${{ github.sha }} .
+
+      # SMOKE TEST: Sprawdzamy, czy aplikacja faktycznie działa
+      - name: Run Smoke Test
         run: |
-          # Odpalamy kontener na chwilę, żeby sprawdzić czy w ogóle wstaje
-          docker run -d -p 8000:8000 --name test-app app-prod:latest
-          sleep 5
+          docker run -d -p 8000:8000 --name smoke-test app-dev-test:${{ github.sha }}
+          sleep 5 # Czekamy chwilę na start FastAPI
           if curl -s localhost:8000 > /dev/null; then
-            echo "App is healthy!"
-            docker stop test-app
+            echo "Smoke test passed!"
+            docker stop smoke-test
           else
-            echo "App failed smoke test!"
-            docker logs test-app
+            echo "Smoke test failed! App did not respond."
+            docker logs smoke-test
             exit 1
           fi
+
+      # LOGOWANIE I PUSH (Tylko jeśli Smoke Test przeszedł)
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Production Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/hello-app:latest
+            ghcr.io/${{ github.repository_owner }}/hello-app:${{ steps.tag_version.outputs.new_tag }}
