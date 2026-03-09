@@ -1,0 +1,43 @@
+name: CI Develop Branch
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  python-logic-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest httpx
+      - name: Run Pytest
+        run: pytest
+
+  # Na develop budujemy obraz, żeby mieć pewność, że wszystko "się klei"
+  build-verification:
+    needs: python-logic-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Production Image
+        run: docker build -t app-prod:latest .
+      - name: Smoke Test
+        run: |
+          # Odpalamy kontener na chwilę, żeby sprawdzić czy w ogóle wstaje
+          docker run -d -p 8000:8000 --name test-app app-prod:latest
+          sleep 5
+          if curl -s localhost:8000 > /dev/null; then
+            echo "App is healthy!"
+            docker stop test-app
+          else
+            echo "App failed smoke test!"
+            docker logs test-app
+            exit 1
+          fi
