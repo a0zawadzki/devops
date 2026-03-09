@@ -1,0 +1,43 @@
+name: CI Distroless with Unit Tests
+
+on:
+  push:
+    branches: [ "feature/distroless-docker" ]
+
+jobs:
+  # ZADANIE 1: Testy jednostkowe (Szybkie)
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt pytest httpx
+          
+      - name: Run Pytest
+        run: pytest
+
+  # ZADANIE 2: Build i Security (Tylko jeśli testy przejdą)
+  docker-build:
+    needs: unit-tests  # TO JEST KLUCZ: Build nie ruszy, jeśli testy zawiodą!
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Distroless Image
+        run: docker build -t hello-distroless:test .
+        
+      - name: Verify No Shell
+        run: |
+          if docker run --rm hello-distroless:test sh -c "ls" 2>/dev/null; then
+            echo "FAIL: Security breach - shell found!"
+            exit 1
+          else
+            echo "PASS: Image is secure (distroless)"
+          fi
