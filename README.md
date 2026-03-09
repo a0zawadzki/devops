@@ -1,6 +1,6 @@
 # 🤖 Pancerne FastAPI - AI-Driven DevOps Showcase
 
-![CI/CD Pipeline](https://github.com/a0zawadzki/devops/actions/workflows/dev-prod.yml/badge.svg?branch=develop)
+![CI/CD Pipeline](https://github.com/a0zawadzki/devops/actions/workflows/test-develop.yml/badge.svg?branch=develop)
 ![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)
 ![AI-Powered](https://img.shields.io/badge/vibe-coding-blueviolet?logo=google-gemini&logoColor=white)
 
