@@ -10,7 +10,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Instalacja zależności i przygotowanie testów
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --prefix=$PYROOT -r requirements.txt
 
 COPY . .
 # URUCHAMIAMY TESTY TUTAJ - Jeśli zawiodą, obraz nie zostanie zbudowany
