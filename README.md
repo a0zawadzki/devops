@@ -1,5 +1,5 @@
 # 🤖 Pancerne FastAPI - AI-Driven DevOps Showcase
-![CI/CD Pipeline](https://github.com/a0zawadzki/devops/actions/workflows/dev-prod.yml/badge.svg?branch=develop)
+![CI/CD Pipeline](https://github.com/a0zawadzki/devops/actions/workflows/test-develop.yml/badge.svg?branch=develop)
 ![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)
 ![AI-Powered](https://img.shields.io/badge/vibe-coding-blueviolet?logo=google-gemini&logoColor=white)
 
@@ -43,7 +43,7 @@ Sprawdź poprawność instalacji komendą: `docker compose version`
 ### Opcja A: Metoda "Pancerna" (Zalecana)
 Pobierz tylko konfigurację i uruchom w bezpiecznym środowisku (ReadOnly FS, Cap Drop, Resource Limits):
 ```bash
-curl -L -O [https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml](https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml) && docker-compose up -d
+curl -L -O https://raw.githubusercontent.com/a0zawadzki/devops/main/docker-compose.yml && docker-compose up -d
 ```
 ### Opcja B: Metoda Szybka (Tylko obraz)
 ```bash
